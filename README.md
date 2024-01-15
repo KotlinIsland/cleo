@@ -436,5 +436,6 @@ echo "fpath+=~/.zfunc" >> ~/.zshrc
 [program] completions fish > ~/.config/fish/completions/[program].fish
 
 # PowerShell
-[program] completions PowerShell > $PROFILE
+#  - Note: The directory of $PROFILE may have to be created in a separate command
+[program] completions PowerShell >> $PROFILE
 ```

@@ -111,7 +111,10 @@ For the new completions to take affect.
 PowerShell profiles are stored at $PROFILE path, so you can simply \
 run command like this:
 
-`<options=bold>{script_name} {command_name} PowerShell > $PROFILE</>`
+`<options=bold>{script_name} {command_name} PowerShell >> $PROFILE</>`
+
+Note: The directory of $PROFILE does not exist by default, and may have \
+to be created in a separate command.
 
 <options=bold>CUSTOM LOCATIONS</>:
 
@@ -296,7 +299,7 @@ script. Consult your shells documentation for how to add such directives.
         assert self.application
         # Global options
         opts = [
-            f'"--{opt.name}"'
+            f'"--{opt.name}"="{opt.description}"'
             for opt in sorted(self.application.definition.options, key=lambda o: o.name)
         ]
 
@@ -308,20 +311,20 @@ script. Consult your shells documentation for how to add such directives.
                 continue
 
             command_name = f'"{cmd.name}"'
-            cmds.append(command_name)
+            cmds.append(f'"{cmd.name}"="{cmd.description}"')
             if len(cmd.definition.options) == 0:
                 continue
-            options = ", ".join(
-                f'"--{opt.name}"'
+            options = "; ".join(
+                f'"--{opt.name}"="{opt.description}"'
                 for opt in sorted(cmd.definition.options, key=lambda o: o.name)
             )
-            cmds_opts += [f"        {command_name} {{ $options += {options}; Break; }}"]
+            cmds_opts += [f"        {command_name} {{ $option = [ordered]@{{{options}}}; Break; }}"]
 
         return TEMPLATES["PowerShell"] % {
             "function": function,
             "script_name": script_name,
-            "opts": ", ".join(opts),
-            "cmds": ", ".join(cmds),
+            "opts": "; ".join(opts),
+            "cmds": "; ".join(cmds),
             "cmds_opts": "\n".join(cmds_opts),
         }
 

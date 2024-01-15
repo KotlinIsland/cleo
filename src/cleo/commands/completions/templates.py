@@ -130,13 +130,18 @@ $%(function)s = {
         [System.Management.Automation.Language.Ast] $commandAst,
         [int] $cursorPosition
     )
+    function Results($res) {
+        return $res.GetEnumerator() | Where-Object { $_.Key -like "$wordToComplete*" } | ForEach-Object { [System.Management.Automation.CompletionResult]::new($_.Key,$_.Key,"ParameterValue",$_.Value) } 
+    }
+    $options = [ordered]@{%(opts)s}
+    $commands = [ordered]@{%(cmds)s}
 
-    $options = %(opts)s
-    $commands = %(cmds)s
-
+    if ($wordToComplete -eq "" -and ($commandAst.CommandElements.Count -eq 1)) {
+        return Results ($commands + $options)
+    }
     if ($wordToComplete -notlike '--*' -and $wordToComplete -notlike "" -and """
     """($commandAst.CommandElements.Count -eq "2")) {
-        return $commands | Where-Object { $_ -like "$wordToComplete*" }
+        return Results $commands
     }
 
     $result = $commandAst.CommandElements | Select-Object -Skip 1 | """
@@ -145,7 +150,7 @@ $%(function)s = {
 %(cmds_opts)s
     }
 
-    return $options | Where-Object { $_ -like "$wordToComplete*" }
+    return Results ($option + $options)
 }
 
 Register-ArgumentCompleter -Native -CommandName %(script_name)s """
